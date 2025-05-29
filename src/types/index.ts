@@ -12,6 +12,9 @@ export interface Candidate {
   id: string;
   name: string;
   party: string;
+  voterId: string;
+  slotId: string;
+  imageUrl: string;
   votes: number;
 }
 

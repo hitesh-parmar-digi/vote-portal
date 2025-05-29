@@ -1,9 +1,10 @@
-import { Voter, VoteRecord, Slot, VotingStatus, SlotStats } from "../types";
+import { Voter, VoteRecord, Slot, VotingStatus, SlotStats, Candidate } from "../types";
 
 class VotingDatabase {
   private voters: Voter[] = [];
   private voteRecords: VoteRecord[] = [];
   private slots: Slot[] = [];
+  private candidates: Candidate[] = [];
 
   constructor() {
     this.loadFromStorage();
@@ -14,10 +15,12 @@ class VotingDatabase {
       const storedVoters = localStorage.getItem('voters');
       const storedRecords = localStorage.getItem('voteRecords');
       const storedSlots = localStorage.getItem('slots');
+      const storedCandidates = localStorage.getItem('candidates');
 
       if (storedVoters) this.voters = JSON.parse(storedVoters);
       if (storedRecords) this.voteRecords = JSON.parse(storedRecords);
       if (storedSlots) this.slots = JSON.parse(storedSlots);
+      if (storedCandidates) this.candidates = JSON.parse(storedCandidates);
     } catch (error) {
       console.error('Error loading data from storage:', error);
     }
@@ -28,6 +31,7 @@ class VotingDatabase {
       localStorage.setItem('voters', JSON.stringify(this.voters));
       localStorage.setItem('voteRecords', JSON.stringify(this.voteRecords));
       localStorage.setItem('slots', JSON.stringify(this.slots));
+      localStorage.setItem('candidates', JSON.stringify(this.candidates));
     } catch (error) {
       console.error('Error saving data to storage:', error);
     }
@@ -58,6 +62,19 @@ class VotingDatabase {
     }) || null;
   }
 
+  public getCandidates(): Candidate[] {
+    return [...this.candidates];
+  }
+
+  public getCandidatesBySlot(slotId: string): Candidate[] {
+    return this.candidates.filter(candidate => candidate.slotId === slotId);
+  }
+
+  public addCandidate(candidate: Candidate): void {
+    this.candidates.push(candidate);
+    this.saveToStorage();
+  }
+
   public getVoterStatus(voter: Voter): VotingStatus {
     const slot = this.slots.find(s => s.id === voter.slotId);
     if (!slot) return 'pending';
@@ -66,6 +83,18 @@ class VotingDatabase {
     const endTime = new Date(slot.endTime).getTime();
 
     if (voter.voted) return 'completed';
+    if (now > endTime) return 'missed';
+    return 'pending';
+  }
+
+  public getCandidateStatus(candidate: Candidate): VotingStatus {
+    const slot = this.slots.find(s => s.id === candidate.slotId);
+    if (!slot) return 'pending';
+
+    const now = new Date().getTime();
+    const endTime = new Date(slot.endTime).getTime();
+
+    if (candidate.votes > 0) return 'completed';
     if (now > endTime) return 'missed';
     return 'pending';
   }
@@ -91,7 +120,7 @@ class VotingDatabase {
     this.saveToStorage();
   }
 
-  public recordVote(voter: Voter): boolean {
+  public recordVote(voter: Voter, candidateId: string): boolean {
     // Check if voter already exists and has voted
     const existingVoter = this.getVoterByVoterId(voter.voterId);
     if (existingVoter && existingVoter.voted) {
@@ -114,9 +143,16 @@ class VotingDatabase {
       this.voters.push(voter);
     }
 
+    // Update candidate votes
+    const candidate = this.candidates.find(c => c.id === candidateId);
+    if (candidate) {
+      candidate.votes++;
+    }
+
     // Record the vote
     const voteRecord: VoteRecord = {
       voter: voter,
+      candidateId,
       timestamp: new Date().toISOString()
     };
     this.voteRecords.push(voteRecord);
@@ -144,6 +180,7 @@ class VotingDatabase {
     this.voters = [];
     this.voteRecords = [];
     this.slots = [];
+    this.candidates = [];
     this.saveToStorage();
   }
 }

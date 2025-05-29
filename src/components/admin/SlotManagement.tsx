@@ -25,7 +25,7 @@ export const SlotManagement = () => {
       return;
     }
 
-    const newSlot: Omit<Slot, 'candidates'> = {
+    const newSlot: Omit<Slot, 'voters'> = {
       id: `slot_${Date.now()}`,
       name,
       startTime: new Date(startTime).toISOString(),

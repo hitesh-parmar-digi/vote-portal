@@ -1,6 +1,9 @@
 export interface Voter {
+  id: string;
   name: string;
   voterId: string;
+  imageUrl: string;
+  slotId: string;
   voted: boolean;
   timestamp?: string;
 }
@@ -10,11 +13,6 @@ export interface Candidate {
   name: string;
   party: string;
   votes: number;
-  voterId: string;
-  imageUrl: string;
-  slotId: string;
-  hasVoted: boolean;
-  votedAt?: string;
 }
 
 export interface VoteRecord {
@@ -34,7 +32,7 @@ export interface Slot {
   name: string;
   startTime: string;
   endTime: string;
-  candidates: Candidate[];
+  voters: Voter[];
 }
 
 export interface SlotStats {

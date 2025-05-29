@@ -1,8 +1,6 @@
-
 import { useEffect, useRef, useState } from "react";
 import * as faceapi from "face-api.js";
 import { WebcamStatus } from "../types";
-import { supabase } from "@/integrations/supabase/client";
 
 interface WebcamProps {
   onStatusChange: (status: WebcamStatus) => void;
@@ -47,28 +45,6 @@ const Webcam = ({ onStatusChange, onFaceData }: WebcamProps) => {
       }
     };
   }, [onStatusChange]);
-
-  const saveFaceCapture = async (canvas: HTMLCanvasElement, voterId: string) => {
-    try {
-      // Convert canvas to blob
-      const blob = await new Promise<Blob>((resolve) => 
-        canvas.toBlob((blob) => resolve(blob!), 'image/jpeg', 0.95)
-      );
-
-      const fileName = `face_${voterId}_${Date.now()}.jpg`;
-      const { error } = await supabase.storage
-        .from('voter_faces')
-        .upload(fileName, blob, {
-          contentType: 'image/jpeg',
-          cacheControl: '3600'
-        });
-
-      if (error) throw error;
-      console.log('Face capture saved successfully');
-    } catch (err) {
-      console.error('Error saving face capture:', err);
-    }
-  };
 
   const startWebcam = async () => {
     if (!isModelLoaded) return;

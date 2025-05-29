@@ -41,6 +41,8 @@ export const CurrentSlotDisplay = () => {
     }
   };
 
+  const voters = db.getVotersBySlot(currentSlot.id);
+
   return (
     <Card>
       <CardHeader>
@@ -71,21 +73,21 @@ export const CurrentSlotDisplay = () => {
           </div>
 
           <div className="space-y-2">
-            <h3 className="text-sm font-medium">Candidates</h3>
+            <h3 className="text-sm font-medium">Registered Voters</h3>
             <div className="space-y-2">
-              {db.getCandidatesBySlot(currentSlot.id).map((candidate) => {
-                const status = db.getCandidateStatus(candidate);
+              {voters.map((voter) => {
+                const status = db.getVoterStatus(voter);
                 return (
-                  <div key={candidate.id} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                  <div key={voter.id} className="flex items-center justify-between p-2 bg-gray-50 rounded">
                     <div className="flex items-center gap-3">
                       <img 
-                        src={candidate.imageUrl} 
-                        alt={candidate.name}
+                        src={voter.imageUrl} 
+                        alt={voter.name}
                         className="w-10 h-10 rounded-full object-cover"
                       />
                       <div>
-                        <p className="font-medium">{candidate.name}</p>
-                        <p className="text-sm text-gray-500">{candidate.party}</p>
+                        <p className="font-medium">{voter.name}</p>
+                        <p className="text-sm text-gray-500">ID: {voter.voterId}</p>
                       </div>
                     </div>
                     <span className={`text-sm font-medium ${getStatusColor(status)}`}>

@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { db } from "@/services/database";
 import { SlotManagement } from "./admin/SlotManagement";
-import { CandidateManagement } from "./admin/CandidateManagement";
+import { VoterManagement } from "./admin/VoterManagement";
 
 const AdminPanel = () => {
   const [activeTab, setActiveTab] = useState("overview");
@@ -48,14 +48,14 @@ const AdminPanel = () => {
         <TabsList className="w-full justify-start p-4">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="slots">Manage Slots</TabsTrigger>
-          <TabsTrigger value="candidates">Manage Candidates</TabsTrigger>
+          <TabsTrigger value="voters">Manage Voters</TabsTrigger>
         </TabsList>
         
         <CardContent className="p-6">
           <TabsContent value="overview" className="space-y-6">
             <div>
               <h3 className="font-medium text-lg mb-4">Voting Statistics</h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 <div className="bg-blue-50 p-4 rounded-lg">
                   <div className="text-sm text-gray-500">Total Slots</div>
                   <div className="text-2xl font-bold">{totalSlots}</div>
@@ -63,10 +63,6 @@ const AdminPanel = () => {
                 <div className="bg-green-50 p-4 rounded-lg">
                   <div className="text-sm text-gray-500">Active Slots</div>
                   <div className="text-2xl font-bold">{activeSlots}</div>
-                </div>
-                <div className="bg-yellow-50 p-4 rounded-lg">
-                  <div className="text-sm text-gray-500">Total Candidates</div>
-                  <div className="text-2xl font-bold">{db.getCandidates().length}</div>
                 </div>
                 <div className="bg-purple-50 p-4 rounded-lg">
                   <div className="text-sm text-gray-500">Total Voters</div>
@@ -94,8 +90,8 @@ const AdminPanel = () => {
             <SlotManagement />
           </TabsContent>
           
-          <TabsContent value="candidates">
-            <CandidateManagement />
+          <TabsContent value="voters">
+            <VoterManagement />
           </TabsContent>
         </CardContent>
       </Tabs>

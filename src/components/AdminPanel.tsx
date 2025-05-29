@@ -1,5 +1,4 @@
-
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { 
   Card, 
@@ -8,31 +7,19 @@ import {
   CardTitle 
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Candidate, Voter } from "@/types";
 import { db } from "@/services/database";
-import { faceRecognition } from "@/services/faceRecognition";
+import { SlotManagement } from "./admin/SlotManagement";
+import { CandidateManagement } from "./admin/CandidateManagement";
 
 const AdminPanel = () => {
-  const [candidates, setCandidates] = useState<Candidate[]>([]);
-  const [voters, setVoters] = useState<Voter[]>([]);
+  const [activeTab, setActiveTab] = useState("overview");
   const { toast } = useToast();
-
-  useEffect(() => {
-    // Load data
-    loadData();
-  }, []);
-
-  const loadData = () => {
-    setCandidates(db.getCandidates());
-    setVoters(db.getAllVoters());
-  };
 
   const handleClearData = () => {
     if (window.confirm("Are you sure you want to clear all voting data? This cannot be undone.")) {
       db.clearAllData();
-      faceRecognition.clearAllFaces();
-      loadData();
       
       toast({
         title: "Data cleared",
@@ -42,76 +29,76 @@ const AdminPanel = () => {
     }
   };
 
-  const totalVotes = candidates.reduce((sum, candidate) => sum + candidate.votes, 0);
+  const slots = db.getSlots();
+  const totalSlots = slots.length;
+  const activeSlots = slots.filter(slot => {
+    const now = new Date().getTime();
+    const start = new Date(slot.startTime).getTime();
+    const end = new Date(slot.endTime).getTime();
+    return now >= start && now <= end;
+  }).length;
   
   return (
     <Card className="w-full shadow-md">
       <CardHeader className="bg-gray-100">
         <CardTitle className="text-lg font-medium">Administration Panel</CardTitle>
       </CardHeader>
-      <CardContent className="p-6 space-y-6">
-        <div>
-          <h3 className="font-medium text-lg mb-4">Voting Statistics</h3>
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-blue-50 p-4 rounded-lg">
-                <div className="text-sm text-gray-500">Total Registered Votes</div>
-                <div className="text-2xl font-bold">{totalVotes}</div>
-              </div>
-              <div className="bg-green-50 p-4 rounded-lg">
-                <div className="text-sm text-gray-500">Registered Voters</div>
-                <div className="text-2xl font-bold">{voters.length}</div>
+      
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="w-full justify-start p-4">
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="slots">Manage Slots</TabsTrigger>
+          <TabsTrigger value="candidates">Manage Candidates</TabsTrigger>
+        </TabsList>
+        
+        <CardContent className="p-6">
+          <TabsContent value="overview" className="space-y-6">
+            <div>
+              <h3 className="font-medium text-lg mb-4">Voting Statistics</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <div className="text-sm text-gray-500">Total Slots</div>
+                  <div className="text-2xl font-bold">{totalSlots}</div>
+                </div>
+                <div className="bg-green-50 p-4 rounded-lg">
+                  <div className="text-sm text-gray-500">Active Slots</div>
+                  <div className="text-2xl font-bold">{activeSlots}</div>
+                </div>
+                <div className="bg-yellow-50 p-4 rounded-lg">
+                  <div className="text-sm text-gray-500">Total Candidates</div>
+                  <div className="text-2xl font-bold">{db.getCandidates().length}</div>
+                </div>
+                <div className="bg-purple-50 p-4 rounded-lg">
+                  <div className="text-sm text-gray-500">Total Voters</div>
+                  <div className="text-2xl font-bold">{db.getAllVoters().length}</div>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
-        
-        <Separator />
-        
-        <div>
-          <h3 className="font-medium text-lg mb-4">Results by Candidate</h3>
-          <div className="space-y-3">
-            {candidates.map(candidate => (
-              <div key={candidate.id} className="bg-gray-50 p-4 rounded-lg">
-                <div className="flex justify-between">
-                  <div>
-                    <div className="font-medium">{candidate.name}</div>
-                    <div className="text-sm text-gray-500">{candidate.party}</div>
-                  </div>
-                  <div>
-                    <div className="text-xl font-bold">{candidate.votes}</div>
-                    <div className="text-sm text-gray-500">
-                      {totalVotes 
-                        ? `${Math.round((candidate.votes / totalVotes) * 100)}%` 
-                        : '0%'}
-                    </div>
-                  </div>
-                </div>
-                <div className="mt-2 w-full bg-gray-200 rounded-full h-2.5">
-                  <div 
-                    className="bg-voting-primary h-2.5 rounded-full" 
-                    style={{ width: totalVotes ? `${(candidate.votes / totalVotes) * 100}%` : '0%' }}
-                  ></div>
-                </div>
+            
+            <Separator />
+            
+            <div className="flex justify-between items-center">
+              <div className="text-sm text-gray-500">
+                Admin control panel for vote management
               </div>
-            ))}
-          </div>
-        </div>
-        
-        <Separator />
-        
-        <div className="flex justify-between items-center">
-          <div className="text-sm text-gray-500">
-            Admin control panel for vote management
-          </div>
-          <Button 
-            variant="destructive" 
-            onClick={handleClearData}
-          >
-            Reset All Data
-          </Button>
-        </div>
-      </CardContent>
+              <Button 
+                variant="destructive" 
+                onClick={handleClearData}
+              >
+                Reset All Data
+              </Button>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="slots">
+            <SlotManagement />
+          </TabsContent>
+          
+          <TabsContent value="candidates">
+            <CandidateManagement />
+          </TabsContent>
+        </CardContent>
+      </Tabs>
     </Card>
   );
 };

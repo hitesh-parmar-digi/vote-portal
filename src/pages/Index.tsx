@@ -1,8 +1,8 @@
-
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import VotingForm from "@/components/VotingForm";
 import AdminPanel from "@/components/AdminPanel";
+import { CurrentSlotDisplay } from "@/components/voting/CurrentSlotDisplay";
 
 const Index = () => {
   const [tab, setTab] = useState("vote");
@@ -24,9 +24,18 @@ const Index = () => {
             <TabsTrigger value="vote">Vote</TabsTrigger>
             <TabsTrigger value="admin">Admin</TabsTrigger>
           </TabsList>
+          
           <TabsContent value="vote">
-            <VotingForm />
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="space-y-6">
+                <CurrentSlotDisplay />
+              </div>
+              <div>
+                <VotingForm />
+              </div>
+            </div>
           </TabsContent>
+          
           <TabsContent value="admin">
             <AdminPanel />
           </TabsContent>

@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { db } from "@/services/database";
 import { SlotManagement } from "./admin/SlotManagement";
 import { VoterManagement } from "./admin/VoterManagement";
+import { CandidateManagement } from "./admin/CandidateManagement";
 
 const AdminPanel = () => {
   const [activeTab, setActiveTab] = useState("overview");
@@ -49,6 +50,7 @@ const AdminPanel = () => {
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="slots">Manage Slots</TabsTrigger>
           <TabsTrigger value="voters">Manage Voters</TabsTrigger>
+          <TabsTrigger value="candidates"> Manage Candidates</TabsTrigger>
         </TabsList>
         
         <CardContent className="p-6">
@@ -84,6 +86,10 @@ const AdminPanel = () => {
                 Reset All Data
               </Button>
             </div>
+          </TabsContent>
+
+          <TabsContent value="candidates">
+            <CandidateManagement />
           </TabsContent>
           
           <TabsContent value="slots">

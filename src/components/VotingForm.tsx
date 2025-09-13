@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { 
   Card, 
@@ -36,26 +35,6 @@ const VotingForm = () => {
     setCandidates(db.getCandidates());
   }, []);
 
-  useEffect(() => {
-    if (!currentFaceDescriptor) return;
-
-    const matchedVoterId = faceRecognition.recognizeFace(currentFaceDescriptor);
-    
-    if (matchedVoterId) {
-      const voter = db.getVoterByVoterId(matchedVoterId);
-      if (voter && voter.voted) {
-        setDuplicateVoterDetected(matchedVoterId);
-        toast({
-          title: "Duplicate voter detected",
-          description: `A previous vote has been detected for voter ID: ${matchedVoterId}`,
-          variant: "destructive",
-        });
-      }
-    } else {
-      setDuplicateVoterDetected(null);
-    }
-  }, [currentFaceDescriptor, toast]);
-
   const getSubmitButtonDisabledReason = (): string | null => {
     if (duplicateVoterDetected) {
       return "You appear to have already voted. Duplicate voting is not allowed.";
@@ -77,6 +56,7 @@ const VotingForm = () => {
   };
 
   const handleSubmit = () => {
+    console.log("Submitting")
     if (!name || !voterId || !selectedCandidate) {
       toast({
         title: "Missing information",
@@ -93,6 +73,24 @@ const VotingForm = () => {
         variant: "destructive",
       });
       return;
+    }
+
+    // Check for duplicate face only when submitting
+    if (currentFaceDescriptor) {
+      const matchedVoterId = faceRecognition.recognizeFace(currentFaceDescriptor);
+      
+      if (matchedVoterId) {
+        const voter = db.getVoterByVoterId(matchedVoterId);
+        if (voter && voter.voted) {
+          setDuplicateVoterDetected(matchedVoterId);
+          toast({
+            title: "Duplicate voter detected",
+            description: `A previous vote has been detected for voter ID: ${matchedVoterId}`,
+            variant: "destructive",
+          });
+          return;
+        }
+      }
     }
 
     if (duplicateVoterDetected) {

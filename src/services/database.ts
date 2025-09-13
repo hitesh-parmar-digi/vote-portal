@@ -123,13 +123,19 @@ class VotingDatabase {
   public recordVote(voter: Voter, candidateId: string): boolean {
     // Check if voter already exists and has voted
     const existingVoter = this.getVoterByVoterId(voter.voterId);
+    console.log("Existing Voter: ", existingVoter)
     if (existingVoter && existingVoter.voted) {
       return false;
     }
 
+    if(!existingVoter) return false
+
     // Check if voter's slot is current
     const currentSlot = this.getCurrentSlot();
-    if (!currentSlot || voter.slotId !== currentSlot.id) {
+    console.log("Current Slot: ", currentSlot)
+    console.log("Slot Match: ", existingVoter.slotId !== currentSlot.id, existingVoter.slotId, currentSlot.id)
+    if (!currentSlot || existingVoter.slotId !== currentSlot.id) {
+      console.log("Check failed")
       return false;
     }
 
@@ -140,11 +146,13 @@ class VotingDatabase {
     } else {
       voter.voted = true;
       voter.timestamp = new Date().toISOString();
+      console.log("Pushing voter to stack")
       this.voters.push(voter);
     }
 
     // Update candidate votes
     const candidate = this.candidates.find(c => c.id === candidateId);
+    console.log("Candidate: ", candidate)
     if (candidate) {
       candidate.votes++;
     }
